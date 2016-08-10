@@ -1,3 +1,8 @@
+# Antes de qualquer coisa, crie uma conta no https://hub.docker.com
+# A minha por exemplo é cesardraw, daí meus projetos lá ficam assim: cesardraw/nome_da_imagem
+
+
+
 # Listar as imagens que baixadas ou construídas
 $ docker images
 
