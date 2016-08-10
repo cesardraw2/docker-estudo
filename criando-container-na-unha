@@ -1,0 +1,118 @@
+# Se o docker não estiver rodando
+$ sudo service docker start
+
+# Baixar um container do Debian
+$ docker pull debian
+
+# Entrar no container para começar a “montagem”
+$ docker run -ti debian bash
+
+# Visualizar o tipo do container
+/# cat /etc/issue
+
+# Criar o diretório para os fontes
+/# mkdir /src && apt-get update
+
+# Instalar o wget
+/# apt-get install -y wget
+
+# Instalar os repositórios dotdeb
+
+# Atualizar os fontes
+/# apt-get update
+
+/# echo "deb http://packages.dotdeb.org wheezy all" > /etc/apt/sources.list.d/dotdeb.list && echo "deb-src http://packages.dotdeb.org wheezy all" >> /etc/apt/sources.list.d/dotdeb.list && wget -O - http://www.dotdeb.org/dotdeb.gpg |apt-key add -
+
+# Instalar php5.4,  fpm
+/# apt-get install php5-cli php5-fpm php5-mysql php5-intl php5-xdebug php5-recode php5-snmp php5-mcrypt php5-memcache php5-memcached php5-imagick php5-curl php5-xsl php5-snmp php5-dev php5-tidy php5-xmlrpc php5-gd php5-pspell php-pear 
+
+# Instalar nginx
+/# apt-get install nginx
+
+# Configurar o php.ini o fpm e o nginx:
+:/# sed -i "s/;date.timezone =/date.timezone = America\/Sao_Paulo/" /etc/php5/cli/php.ini \
+    && sed -i "s/;date.timezone =/date.timezone = America\/Sao_Paulo/" /etc/php5/fpm/php.ini \
+    && sed -i "s/short_open_tag = On/short_open_tag = Off/" /etc/php5/cli/php.ini \
+    && sed -i "s/short_open_tag = On/short_open_tag = Off/" /etc/php5/fpm/php.ini \
+    && sed -i "s/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/" /etc/php5/cli/php.ini \
+    && sed -i "s/error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT/error_reporting = E_ALL/" /etc/php5/fpm/php.ini \
+    && sed -i "s/display_errors = Off/display_errors = On/" /etc/php5/cli/php.ini \
+    && sed -i "s/display_errors = Off/display_errors = On/" /etc/php5/fpm/php.ini \
+    && sed -i "s/display_startup_errors = Off/display_startup_errors = On/" /etc/php5/cli/php.ini \
+    && sed -i "s/display_startup_errors = Off/display_startup_errors = On/" /etc/php5/fpm/php.ini
+
+# Criar um virtual host teste.dev
+:/# cat << FIM >  /etc/nginx/sites-available/teste.dev.conf
+server {
+ 
+  server_name teste.dev;
+ 
+  client_max_body_size  5m;
+  client_header_timeout 1200;
+  client_body_timeout   1200;
+  send_timeout          1200;
+  keepalive_timeout     1200;
+ 
+  root        /src/;
+  try_files   $uri $uri/ /index.php?$args;
+  index       index.php;
+ 
+  location ~ \.php$ {
+    fastcgi_pass    unix:/var/run/php5-fpm.sock;
+    fastcgi_index   index.php;
+    include         fastcgi_params;
+ 
+    fastcgi_connect_timeout 1200;
+    fastcgi_send_timeout    7200;
+    fastcgi_read_timeout    7200;
+    fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+  }
+}
+FIM
+
+# Ativar o vhost teste.dev nos sites enable
+ln -sf /etc/nginx/sites-available/teste.dev.conf /etc/nginx/sites-enabled/teste.dev.conf
+
+## DICA ##
+Quando iniciamos um container ele executa o comando que informamos e ao encerrar o comando ele finaliza esse container.
+Portanto, quando subimos um container logo após o Nginx iniciar com sucesso ele finaliza (o container todo finaliza).
+Solução:
+Rodar o Nginx como um executável normal, não como daemon.
+
+# Mudar a configuração no nginx.conf para torná-lo um executável normal
+/# sed -i "s/www-data;/www-data;\\ndaemon off;/g" /etc/nginx/nginx.conf
+
+# Criar um script "run.sh" que irá rodar o container
+/# cat << FIM >  /run.sh
+#!/bin/bash
+/etc/init.d/php5-fpm restart && nginx
+FIM
+
+# Tornar o arquivo run.sh executável
+/# chmod a+x /run.sh
+
+# Sair do container
+/# exit
+
+# Pegar o container id
+$ docker ps -l
+
+# Gerar uma nova imagem
+$ docker commit  cesardraw/nginx-phpfpm
+
+# Enviar para o docker hub
+$ docker push cesardraw/nginx-phpfpm
+
+# Para usar a imagem em um projeto php
+$ docker run -p 8084:80 -v /caminho/para/meu/projeto/php:/src wfsilva/nginx-phpfpm /run.sh
+
+## DICA ##
+## Caso o container não esteja na máquina host, será baixado do repositório no docker hub
+## No comando anterior, o caminho para os fontes do projeto (opção -v) será montado em "/src" que também foi configurado como path para o virtualhost. 
+## A porta 8084 foi mapeada para que seja possível acessar a aplicação
+## O comando executado no final da instrução, foi o script run.sh que inicia o php-fpm e o Nginx 
+
+# Adicionar o VIrtualHost no arquivo de hosts (da máquina host)
+echo "127.0.0.1 teste.dev" | sudo tee -a  /etc/hosts
+
+# Testar a url http://teste.dev
