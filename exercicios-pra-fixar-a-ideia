@@ -1,0 +1,38 @@
+# Listar as imagens que baixadas ou construídas
+$ docker images
+
+# Listar os containers que estão, ou estiveram rodando
+$ docker ps -a
+
+# Baixar um container básico do dockerhub
+$ docker pull debian
+
+# Rodar o container, cria um arquivo de teste, faz a alteração e pára
+$ docker run -it debian touch /tmp/teste
+
+# Rodar uma imagem alterada listando a pasta /tmp da mesma
+$ docker run cesardraw/debian-teste ls /tmp
+
+# Listar o último container para pegar o Container ID
+$docker ps -l
+
+# Outra maneira de alterar um container é rodar passando o comando bash
+$ docker run -it debian bash
+
+# Gerar uma nova imagem com as alterações (usando o container ID):
+$ docker commit  cesardraw/debian-teste
+
+# Enviar a nova imagem para a conta do usuário /
+$ docker push cesardraw/teste1
+
+# Exercicio:
+   1 - Rodar de maneira interativa e com terminal (-it)
+   2 - Remover as alterações feitas no container, quando o container for finalizado (--rm)
+   3 - Definir um nome para o container
+   4 - Mapear a porta 80 do container para a porta 80 da máquina host ( -p 8083:80 )
+   5 - Montar o caminho do projeto/aplicação para dentro de /var/www/html que está dentro do container ( -v /caminho/projeto/aplicacao:/var/www/html )
+   6 - Baixar a imagem base do container php, tag 5.6-apache php:5.6-apache  
+   7 - Rodar com flag privileged para adicinar permissões de escrita (--privileged)
+
+   
+$ docker run -it --rm --name teste-php-draw -p 8083:80 -v /caminho/projeto/aplicacao:/var/www/html php:5.6-apache --privileged
