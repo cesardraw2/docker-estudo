@@ -23,14 +23,16 @@ Exemplos de criação de containers para bancos de dados
 4 - Montar um server Oracle
   4.1 - Baixar a imagem do Oracle 11g Ubuntu 16.4
     $ docker pull sath89/oracle-xe-11g
-  4.2 - Criar um container do Oracle
-    ### 
+  4.2 - Criar um container do Oracle, temos duas formas de fazer
+    
+    ### 4.2A - Forma básica para ambiente DEV
     $ docker run -d -p 27018:22 -p 27019:1521 -e ORACLE_ALLOW_REMOTE=true -v /home/cesardraw/data/oracle:/u01/app/oracle wnameless/oracle-xe-11g
-    ### Algumas configurações interessantes para HMG e PROD Quando subir o container:
+    
+    ### 4.2B - Algumas configurações interessantes para HMG e PROD Quando subir o container:
     #processes=x
     #sessions=x*1.1+5
     #transactions=sessions*1.1
-      docker run -d -p 8080:8080 -p 1521:1521 -v /home/cesardraw/data/oracle:/u01/app/oracle\
+    $  docker run -d -p 8080:8080 -p 1521:1521 -v /home/cesardraw/data/oracle:/u01/app/oracle\
       -e processes=1000 \
       -e sessions=1105 \
       -e transactions=1215 \
