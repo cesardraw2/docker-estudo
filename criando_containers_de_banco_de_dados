@@ -1,0 +1,44 @@
+Exemplos de criação de containers para bancos de dados
+
+1 - Montar server MYSQL
+  1.1 - Baixar a Imagem do MYSQL
+    $ docker pull mysql
+    
+  1.2 - Criar um container MYSQL
+    $ docker run -d --name mysql-draw -p 8091:3306 -e MYSQL_ROOT_PASSWORD=@my123#! -v /home/cesardraw/data/mysql-draw:/var/lib/mysql mysql
+
+2 - Montar server PostgreSQL
+  2.1 - Baixar a Imagem do PostgreSQL
+    $ docker pull postgres
+    
+  2.2 - Criar um container PostgreSQL
+    $ docker run -d --name postgres-draw -p 8092:5432 -e POSTGRES_PASSWORD=@pg123#! -v /home/cesardraw/data/postgresql-draw/postgresql:/etc/postgresql -v /home/cesardraw/data/postgresql-draw/log:/var/log/postgresql -v /home/cesardraw/data/postgresql-draw/lib:/var/lib/postgresql postgres
+
+3 - Montar server do MongoDB
+  3.1 - Baixar a Imagem do MongoDB
+    $ docker pull mongo
+  3.2 - Criar um container do MongoDB
+    $ docker run -d -p 27017:27017 --name mongodb-draw -v /home/cesardraw/data/mongodb-draw:/data/db
+    
+4 - Montar um server Oracle
+  4.1 - Baixar a imagem do Oracle 11g Ubuntu 16.4
+    $ docker pull wnameless/oracle-xe-11g
+  4.2 - Criar um container do Oracle
+    $ docker run -d -p 27018:22 -p 27019:1521 -e ORACLE_ALLOW_REMOTE=true -v /home/cesardraw/data/oracle:/u01/app/oracle wnameless/oracle-xe-11g
+    
+    ### Configurações para acessar a base de dados do container:
+    #  hostname: localhost
+    #  port: 27019
+    #  sid: xe
+    #  usuário: system
+    #  senha: oracle
+    
+    ###  Senha para SYS e SYSTEM
+    #  oracle
+    
+    ### Acessando o container via SSH
+    # ssh root@localhost -p 27018
+    # password: admin
+    
+    
+    
